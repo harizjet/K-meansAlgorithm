@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 from statistics import mean
-from kmean.visualized import scatplot
+from kmean.utils import *
 
 
 class kmean(object):
@@ -21,6 +21,7 @@ class kmean(object):
         self.data = data
         self.n_centroid = n_centroid
         self.centroids = centroids
+        self.converge = False
 
         if centroids and len(centroids) != n_centroid:
             raise Exception("Centroids given != n given!")
@@ -51,11 +52,16 @@ class kmean(object):
             self.centroids.append([ran_x, ran_y])
 
     def re_centroids(self) -> None:
+        conv = True
         for k, cent in self.centroids.items():
             tdf = self.data[self.data['grouping'] == k]
             mid_x = mean(tdf['x']) if len(tdf) else cent[0]
             mid_y = mean(tdf['y']) if len(tdf) else cent[1]
+
+            if self.centroids[k] != [mid_x, mid_y]:
+                conv = False
             self.centroids[k] = [mid_x, mid_y]
+        self.converge = conv
 
     def euclidean(self, x, y) -> None:
         min_dist = [math.inf, None]
@@ -79,7 +85,7 @@ class kmean(object):
             nume = (cent[0] * x) + (cent[1] * y)
             deno = ((x ** 2 + y ** 2) ** 0.5) * \
                     ((cent[0] ** 2 + cent[1] ** 2) ** 0.5)
-            dist = nume / deno
+            dist = 1 - (nume / deno)
             if dist < min_dist[0]:
                 min_dist = [dist, k]
         return min_dist[1]
@@ -90,11 +96,14 @@ class kmean(object):
             list_group.append(self.distance(row['x'], row['y']))
         self.data['grouping'] = list_group
 
-    def run(self, n, visualized=True) -> None:
-        for _ in range(n):
+    def run(self, n, visualized) -> None:
+        for i in range(n):
             self.get_group()
+            data = combineSaved(self.data, self.centroids)
             if visualized:
-                scatplot(self.data, self.centroids)
+                scatplot(data, 
+                        iterate=i+1, 
+                        converge=self.converge)
             self.re_centroids()
         print(self.data)
         print(self.centroids)
