@@ -13,12 +13,11 @@ class kmean(object):
                 data: pd.DataFrame,
                 n_centroid: int,
                 centroids=[],
-                distance='euclidean', 
+                distance='cosine', 
                 *args, **kargs):
 
         super().__init__(*args, **kargs)
         self.data = data
-        self.distance = distance
         self.n_centroid = n_centroid
         self.centroids = centroids
 
@@ -28,6 +27,15 @@ class kmean(object):
             self.init_centroid()
 
         self.centroids = {i: cent for i, cent in enumerate(centroids)}
+
+        if distance == 'euclidean':
+            self.distance = self.euclidean
+        elif distance == 'manhattan':
+            self.distance = self.manhattan
+        elif distance == 'cosine':
+            self.distance = self.cosine
+        else:
+            raise Exception("Wrong distance option given!")
 
     def init_centroid(self) -> None:
         max_x = max(self.data['x'])
@@ -47,23 +55,42 @@ class kmean(object):
             mid_y = mean(tdf['y']) if len(tdf) else cent[1]
             self.centroids[k] = [mid_x, mid_y]
 
-    def euclidean(self) -> None:
-        def calculate(x, y) -> int:
-            min_dist = [math.inf, None]
-            for k, cent in self.centroids.items():
-                dist = (cent[0] - x) ** 2 + (cent[1] - y) ** 2
-                if dist < min_dist[0]:
-                    min_dist = [dist, k]
-            return min_dist[1]
+    def euclidean(self, x, y) -> None:
+        min_dist = [math.inf, None]
+        for k, cent in self.centroids.items():
+            dist = (cent[0] - x) ** 2 + (cent[1] - y) ** 2
+            if dist < min_dist[0]:
+                min_dist = [dist, k]
+        return min_dist[1]
 
+    def manhattan(self, x, y) -> None:
+        min_dist = [math.inf, None]
+        for k, cent in self.centroids.items():
+            dist = abs(cent[0] - x) + abs(cent[1] - y)
+            if dist < min_dist[0]:
+                min_dist = [dist, k]
+        return min_dist[1]
+
+    def cosine(self, x, y) -> None:
+        min_dist = [math.inf, None]
+        for k, cent in self.centroids.items():
+            nume = (cent[0] * x) + (cent[1] * y)
+            deno = ((x ** 2 + y ** 2) ** 0.5) * \
+                    ((cent[0] ** 2 + cent[1] ** 2) ** 0.5)
+            dist = nume / deno
+            if dist < min_dist[0]:
+                min_dist = [dist, k]
+        return min_dist[1]
+
+    def get_group(self) -> None:
         list_group = []
         for ind, row in self.data.iterrows():
-            list_group.append(calculate(row['x'], row['y']))
+            list_group.append(self.distance(row['x'], row['y']))
         self.data['grouping'] = list_group
 
     def run(self, n) -> None:
         for _ in range(n):
-            self.euclidean()
+            self.get_group()
             self.re_centroids()
         print(self.data)
         print(self.centroids)
