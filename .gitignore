@@ -1,0 +1,6 @@
+*.py[cod]
+.*
+!/.gitignore
+[~][$]*
+*.docx
+*.pdf
