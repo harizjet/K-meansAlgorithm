@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 from statistics import mean
+from kmean.visualized import scatplot
 
 
 class kmean(object):
@@ -13,7 +14,7 @@ class kmean(object):
                 data: pd.DataFrame,
                 n_centroid: int,
                 centroids=[],
-                distance='cosine', 
+                distance='euclidean', 
                 *args, **kargs):
 
         super().__init__(*args, **kargs)
@@ -27,6 +28,7 @@ class kmean(object):
             self.init_centroid()
 
         self.centroids = {i: cent for i, cent in enumerate(centroids)}
+        self.data['type'] = ['point' for _ in range(self.data.shape[0])]
 
         if distance == 'euclidean':
             self.distance = self.euclidean
@@ -88,9 +90,11 @@ class kmean(object):
             list_group.append(self.distance(row['x'], row['y']))
         self.data['grouping'] = list_group
 
-    def run(self, n) -> None:
+    def run(self, n, visualized=True) -> None:
         for _ in range(n):
             self.get_group()
+            if visualized:
+                scatplot(self.data, self.centroids)
             self.re_centroids()
         print(self.data)
         print(self.centroids)
