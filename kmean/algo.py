@@ -22,6 +22,7 @@ class kmean(object):
         self.n_centroid = n_centroid
         self.centroids = centroids
         self.converge = False
+        self.cost = math.inf
 
         if centroids and len(centroids) != n_centroid:
             raise Exception("Centroids given != n given!")
@@ -32,11 +33,11 @@ class kmean(object):
         self.data['type'] = ['point' for _ in range(self.data.shape[0])]
 
         if distance == 'euclidean':
-            self.distance = self.euclidean
+            self.distance = kmean.euclidean
         elif distance == 'manhattan':
-            self.distance = self.manhattan
+            self.distance = kmean.manhattan
         elif distance == 'cosine':
-            self.distance = self.cosine
+            self.distance = kmean.cosine
         else:
             raise Exception("Wrong distance option given!")
 
@@ -63,43 +64,58 @@ class kmean(object):
             self.centroids[k] = [mid_x, mid_y]
         self.converge = conv
 
-    def euclidean(x: int, y: int, centroids: dict) -> None:
-        min_dist = [math.inf, None]
-        for k, cent in self.centroids.items():
+    def euclidean(x: int, y: int, centroids: dict) -> list:
+        min_dist = [None, math.inf]
+        for k, cent in centroids.items():
             dist = (cent[0] - x) ** 2 + (cent[1] - y) ** 2
-            if dist < min_dist[0]:
-                min_dist = [dist, k]
-        return min_dist[1]
 
-    def manhattan(x: int, y: int, centroids: dict) -> None:
-        min_dist = [math.inf, None]
-        for k, cent in self.centroids.items():
+            print(f"Distance from {(x, y)} to Centroid {k}: {dist}")
+            if dist < min_dist[1]:
+                min_dist = [k, dist]
+        return min_dist
+
+    def manhattan(x: int, y: int, centroids: dict) -> list:
+        min_dist = [None, math.inf]
+        for k, cent in centroids.items():
             dist = abs(cent[0] - x) + abs(cent[1] - y)
-            if dist < min_dist[0]:
-                min_dist = [dist, k]
-        return min_dist[1]
 
-    def cosine(x: int, y: int, centroids: dict) -> None:
-        min_dist = [math.inf, None]
-        for k, cent in self.centroids.items():
+            print(f"Distance from {(x, y)} to Centroid {k}: {dist}")
+            if dist < min_dist[1]:
+                min_dist = [k, dist]
+        return min_dist
+
+    def cosine(x: int, y: int, centroids: dict) -> list:
+        min_dist = [None, math.inf]
+        for k, cent in centroids.items():
             nume = (cent[0] * x) + (cent[1] * y)
             deno = ((x ** 2 + y ** 2) ** 0.5) * \
                     ((cent[0] ** 2 + cent[1] ** 2) ** 0.5)
             dist = 1 - (nume / deno)
-            if dist < min_dist[0]:
-                min_dist = [dist, k]
-        return min_dist[1]
+
+            print(f"Distance from {(x, y)} to Centroid {k}: {dist}")
+            if dist < min_dist[1]:
+                min_dist = [k, dist]
+        return min_dist
 
     def get_group(self) -> None:
         list_group = []
         for ind, row in self.data.iterrows():
-            list_group.append(self.distance(row['x'], row['y']))
-        self.data['grouping'] = list_group
+            list_group.append(self.distance(row['x'], row['y'], self.centroids))
+        self.data['grouping'] = [x[0] for x in list_group]
+        self.data['distance'] = [x[1] for x in list_group]
 
     def run(self, n, visualized) -> None:
         for i in range(n):
+            print(f"ITERATION {i}")
             self.get_group()
+
             data = combineSaved(self.data, self.centroids)
+            print(f"Data: {[[val['x'], val['y']] for i, val in self.data[['x', 'y']].iterrows()]}")
+            print(f"Centroids: {self.centroids}")
+            print(f"Group: {self.data['grouping'].values}")
+            print(f"Distance: {self.data['distance'].values}")
+            print(f"SSE: {sum(self.data['distance'].values)}\n")
+
             if visualized:
                 scatplot(data, 
                         iterate=i+1, 
@@ -107,5 +123,3 @@ class kmean(object):
             self.re_centroids()
         print(self.data)
         print(self.centroids)
-
-

@@ -10,7 +10,8 @@ def combineSaved(data: pd.DataFrame, centroids: dict) -> None:
             'x': [cent[0] for cent in centroids.values()],
             'y': [cent[1] for cent in centroids.values()],
             'grouping': [group for group in centroids.keys()],
-            'type': ['centroid' for _ in range(len(centroids))]})
+            'type': ['centroid' for _ in range(len(centroids))],
+            'distance': [0 for _ in range(len(centroids))]})
 
     data = pd.concat([data, tdf], axis=0)
     data.to_csv('result.csv', index=False)
