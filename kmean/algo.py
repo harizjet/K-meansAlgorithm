@@ -63,7 +63,7 @@ class kmean(object):
             self.centroids[k] = [mid_x, mid_y]
         self.converge = conv
 
-    def euclidean(self, x, y) -> None:
+    def euclidean(x: int, y: int, centroids: dict) -> None:
         min_dist = [math.inf, None]
         for k, cent in self.centroids.items():
             dist = (cent[0] - x) ** 2 + (cent[1] - y) ** 2
@@ -71,7 +71,7 @@ class kmean(object):
                 min_dist = [dist, k]
         return min_dist[1]
 
-    def manhattan(self, x, y) -> None:
+    def manhattan(x: int, y: int, centroids: dict) -> None:
         min_dist = [math.inf, None]
         for k, cent in self.centroids.items():
             dist = abs(cent[0] - x) + abs(cent[1] - y)
@@ -79,7 +79,7 @@ class kmean(object):
                 min_dist = [dist, k]
         return min_dist[1]
 
-    def cosine(self, x, y) -> None:
+    def cosine(x: int, y: int, centroids: dict) -> None:
         min_dist = [math.inf, None]
         for k, cent in self.centroids.items():
             nume = (cent[0] * x) + (cent[1] * y)

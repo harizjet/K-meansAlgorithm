@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     data = pd.read_csv(file)
     data.set_index('point', inplace=True, drop=True)
-    centroids = []
+    centroids = [[4, 2], [2, 1]]
 
     kmean_euclidean = kmean(data,
                             n_centroid, 
