@@ -67,7 +67,7 @@ class kmean(object):
     def euclidean(x: int, y: int, centroids: dict) -> list:
         min_dist = [None, math.inf]
         for k, cent in centroids.items():
-            dist = (cent[0] - x) ** 2 + (cent[1] - y) ** 2
+            dist = ((cent[0] - x) ** 2 + (cent[1] - y) ** 2) ** 0.5
 
             print(f"Distance from {(x, y)} to Centroid {k}: {dist}")
             if dist < min_dist[1]:
@@ -106,7 +106,7 @@ class kmean(object):
 
     def run(self, n, visualized) -> None:
         for i in range(n):
-            print(f"ITERATION {i}")
+            print(f"ITERATION {i + 1}")
             self.get_group()
 
             data = combineSaved(self.data, self.centroids)
@@ -114,7 +114,7 @@ class kmean(object):
             print(f"Centroids: {self.centroids}")
             print(f"Group: {self.data['grouping'].values}")
             print(f"Distance: {self.data['distance'].values}")
-            print(f"SSE: {sum(self.data['distance'].values)}\n")
+            print(f"SSE: {sum([x ** 2 for x in self.data['distance'].values])}\n")
 
             if visualized:
                 scatplot(data, 
