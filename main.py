@@ -8,7 +8,8 @@ if __name__ == "__main__":
         n_centroid = int(sys.argv[2])
         distance = sys.argv[3]
         max_iteration = int(sys.argv[4])
-        visualized = True if sys.argv[5] == 'visualized' else False
+        visualized = True if len(sys.argv) > 5 and \
+            sys.argv[5] == 'visualized' else False
     else:
         raise Exception("Wrong argument")
 
